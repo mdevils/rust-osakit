@@ -26,12 +26,12 @@ pub fn __arg_s_error<T>(
 }
 
 #[doc(hidden)]
-pub fn __exec_and_deserialize<T: DeserializeOwned>(
+pub fn __exec_and_deserialize<T: DeserializeOwned, I: IntoIterator<Item = Value>>(
     script: &Script,
     fn_name: &str,
-    arguments: &[Value],
+    arguments: I,
 ) -> Result<T, ScriptFunctionRunError> {
-    match script.execute_function(fn_name, &arguments) {
+    match script.execute_function(fn_name, arguments) {
         Ok(output) => {
             let deserialized_value: Result<T, serde_json::Error> = from_value(output);
             match deserialized_value {
@@ -84,22 +84,28 @@ pub fn __exec_and_deserialize<T: DeserializeOwned>(
 ///     name: String,
 /// }
 ///
-/// let script = MyJsScript::new().unwrap();
+/// # use std::error::Error;
+/// # fn main() -> Result<(), Box<dyn Error>> {
+/// #
+/// let script = MyJsScript::new()?;
 /// assert_eq!(
-///     script.multiply(3, 2).unwrap(),
+///     script.multiply(3, 2)?,
 ///     6
 /// );
 /// assert_eq!(
-///     script.concat("Hello, ", "World").unwrap(),
+///     script.concat("Hello, ", "World")?,
 ///     "Hello, World"
 /// );
 /// assert_eq!(
-///     script.current_user().unwrap(),
+///     script.current_user()?,
 ///     User {
 ///         id: 21,
 ///         name: "root".into()
 ///     }
 /// );
+/// #
+/// # Ok(())
+/// # }
 /// ```
 #[cfg(feature = "declare-script")]
 #[macro_export]
@@ -191,7 +197,7 @@ macro_rules! __script_fn_impl {
             $crate::macros::__exec_and_deserialize(
                 &self.script,
                 stringify!($name),
-                &arguments
+                arguments
             )
         }
     };

@@ -58,22 +58,28 @@
 //!     name: String,
 //! }
 //!
-//! let script = MyJsScript::new().unwrap();
+//! # use std::error::Error;
+//! # fn main() -> Result<(), Box<dyn Error>> {
+//! #
+//! let script = MyJsScript::new()?;
 //! assert_eq!(
-//!     script.multiply(3, 2).unwrap(),
+//!     script.multiply(3, 2)?,
 //!     6
 //! );
 //! assert_eq!(
-//!     script.concat("Hello, ", "World").unwrap(),
+//!     script.concat("Hello, ", "World")?,
 //!     "Hello, World"
 //! );
 //! assert_eq!(
-//!     script.current_user().unwrap(),
+//!     script.current_user()?,
 //!     User {
 //!         id: 21,
 //!         name: "root".into()
 //!     }
 //! );
+//! #
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! ## Example using `Script`
@@ -81,6 +87,9 @@
 //! ```
 //! use osakit::{Language, Map, Script, Value, Number};
 //!
+//! # use std::error::Error;
+//! # fn main() -> Result<(), Box<dyn Error>> {
+//! #
 //! let mut script = Script::new_from_source(
 //!     Language::AppleScript, "
 //!     on is_app_running()
@@ -94,10 +103,10 @@
 //!     return {id: 21, name: \"root\"}
 //! ");
 //!
-//! script.compile().unwrap();
+//! script.compile()?;
 //!
 //! assert_eq!(
-//!     script.execute().unwrap(),
+//!     script.execute()?,
 //!     Value::Object(Map::from_iter(vec![
 //!         ("id".into(), Value::Number(Number::from(21))),
 //!         ("name".into(), Value::String("root".into()))
@@ -105,17 +114,20 @@
 //! );
 //!
 //! assert_eq!(
-//!     script.execute_function("concat", &vec![
+//!     script.execute_function("concat", vec![
 //!         Value::String("Hello, ".into()),
 //!         Value::String("World!".into())
-//!     ]).unwrap(),
+//!     ])?,
 //!     Value::String("Hello, World!".into())
 //! );
 //!
 //! assert_eq!(
-//!     script.execute_function("is_app_running", &vec![]).unwrap(),
+//!     script.execute_function("is_app_running", vec![])?,
 //!     Value::Bool(false)
 //! );
+//! #
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! ## Supported platforms

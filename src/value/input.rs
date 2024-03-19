@@ -11,11 +11,11 @@ pub enum ScriptInputConversionError {
     NumberConversionError(String),
 }
 
-fn value_to_nsobject(value: &Value) -> Result<Id<NSObject>, ScriptInputConversionError> {
+fn value_to_nsobject(value: Value) -> Result<Id<NSObject>, ScriptInputConversionError> {
     Ok(unsafe {
         match value {
-            Value::String(s) => Id::cast(NSString::from_str(s)),
-            Value::Bool(b) => Id::cast(NSNumber::initWithBool(NSNumber::alloc(), *b)),
+            Value::String(s) => Id::cast(NSString::from_str(&s)),
+            Value::Bool(b) => Id::cast(NSNumber::initWithBool(NSNumber::alloc(), b)),
             Value::Number(n) => Id::cast(if n.is_f64() {
                 n.as_f64()
                     .map(|f| NSNumber::initWithDouble(NSNumber::alloc(), f))
@@ -40,8 +40,8 @@ fn value_to_nsobject(value: &Value) -> Result<Id<NSObject>, ScriptInputConversio
             Value::Object(obj) => {
                 let mut keys: Vec<Id<NSString>> = Vec::new();
                 let mut values: Vec<Id<NSObject>> = Vec::new();
-                for (key, value) in obj.iter() {
-                    keys.push(NSString::from_str(key));
+                for (key, value) in obj.into_iter() {
+                    keys.push(NSString::from_str(&key));
                     values.push(value_to_nsobject(value)?)
                 }
                 let key_refs: Vec<&NSString> = keys.iter().map(|k| k.deref()).collect();
@@ -51,8 +51,8 @@ fn value_to_nsobject(value: &Value) -> Result<Id<NSObject>, ScriptInputConversio
     })
 }
 
-pub(crate) fn values_vec_to_ns_array(
-    values: &[Value],
+pub(crate) fn values_vec_to_ns_array<I: IntoIterator<Item = Value>>(
+    values: I,
 ) -> Result<Id<NSArray>, ScriptInputConversionError> {
     let mut vec: Vec<Id<NSObject>> = Vec::new();
 

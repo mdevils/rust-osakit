@@ -9,7 +9,7 @@ use icrate::OSAKit::{
     OSALanguage, OSALanguageInstance, OSANull, OSAScript, OSAScriptErrorMessageKey,
     OSAScriptErrorRangeKey,
 };
-use std::fmt::Debug;
+use std::fmt::{Debug, Formatter};
 use std::ops::Deref;
 use thiserror::Error;
 
@@ -27,6 +27,9 @@ pub enum Language {
 /// ```
 /// use osakit::{Language, Map, Script, Value, Number};
 ///
+/// # use std::error::Error;
+/// # fn main() -> Result<(), Box<dyn Error>> {
+/// #
 /// let mut script = Script::new_from_source(
 ///     Language::AppleScript,
 ///     "
@@ -41,10 +44,10 @@ pub enum Language {
 ///     return {id: 21, name: \"root\"}",
 /// );
 ///
-/// script.compile().unwrap();
+/// script.compile()?;
 ///
 /// assert_eq!(
-///     script.execute().unwrap(),
+///     script.execute()?,
 ///     Value::Object(Map::from_iter(vec![
 ///         ("id".into(), Value::Number(Number::from(21))),
 ///         ("name".into(), Value::String("root".into()))
@@ -52,21 +55,38 @@ pub enum Language {
 /// );
 ///
 /// assert_eq!(
-///     script.execute_function("concat", &vec![
+///     script.execute_function("concat", vec![
 ///         Value::String("Hello, ".into()),
 ///         Value::String("World!".into())
-///     ]).unwrap(),
+///     ])?,
 ///     Value::String("Hello, World!".into())
 /// );
 ///
 /// assert_eq!(
-///     script.execute_function("is_app_running", &vec![]).unwrap(),
+///     script.execute_function("is_app_running", vec![])?,
 ///     Value::Bool(false)
 /// );
+/// #
+/// # Ok(())
+/// # }
 /// ```
 pub struct Script {
     script: Id<OSAScript>,
     compiled: bool,
+}
+
+impl Debug for Script {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Script {{ language: Language::{}, source: {:?}, compiled: {:?} }}",
+            unsafe { self.script.language().name() }
+                .map(|l| l.to_string())
+                .unwrap_or_else(|| "?".to_string()),
+            unsafe { self.script.source() }.to_string(),
+            self.compiled
+        )
+    }
 }
 
 /// Error happening during compilation. Returned by [`Script::compile`].
@@ -213,10 +233,10 @@ impl Script {
 
     /// Executes a function in case of `JavaScript` and a subroutine in case of `AppleScript`.
     /// Specified `arguments` are passed to the function and function return value is retuned as [`Value`].
-    pub fn execute_function(
+    pub fn execute_function<I: IntoIterator<Item = Value>>(
         &self,
         function_name: &str,
-        arguments: &[Value],
+        arguments: I,
     ) -> Result<Value, ScriptExecutionError> {
         let mut error_opt: Option<Id<NSDictionary<NSString, AnyObject>>> = None;
         let ns_handler_name = NSString::from_str(function_name);
@@ -405,7 +425,7 @@ mod test {
         script.compile().unwrap();
         assert_eq!(
             script
-                .execute_function("test", &vec![Value::Bool(true), Value::Null])
+                .execute_function("test", vec![Value::Bool(true), Value::Null])
                 .unwrap(),
             Value::Array(vec![Value::Bool(true), Value::Null])
         );
@@ -422,9 +442,18 @@ mod test {
         script.compile().unwrap();
         assert_eq!(
             script
-                .execute_function("test_handler", &vec![Value::Bool(true), Value::Null])
+                .execute_function("test_handler", vec![Value::Bool(true), Value::Null])
                 .unwrap(),
             Value::Array(vec![Value::Bool(true), Value::Null])
+        );
+    }
+
+    #[test]
+    fn it_supports_debug() {
+        let script = Script::new_from_source(Language::AppleScript, "return 123");
+        assert_eq!(
+            format!("{:?}", script),
+            "Script { language: Language::AppleScript, source: \"return 123\", compiled: false }"
         );
     }
 }
