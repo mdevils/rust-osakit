@@ -8,7 +8,8 @@ install-bin: cargo-run-bin
 hooks:
 	@for hook in ${HOOKS}; do \
   		if [ ! -f ".git/hooks/$$hook" ]; then \
-			echo -e "#!/bin/sh\n$$hook" > ".git/hooks/$$hook"; \
+			echo "#!/bin/sh\nmake $$hook" > ".git/hooks/$$hook"; \
+			chmod +x ".git/hooks/$$hook"; \
 			echo "[OK] Hook installed: $$hook"; \
 		fi \
 	done
