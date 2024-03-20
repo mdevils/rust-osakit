@@ -1,6 +1,6 @@
 [package]
 name = "osakit"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Marat Dulin <mdevils@gmail.com>"]
 description = "OSAKit macOS Framework adapted for Rust"
@@ -33,3 +33,7 @@ declare-script = []
 [package.metadata.bin]
 cargo-nextest = { version = "0.9.68", locked = true }
 cargo-watch = { version = "8.5.2" }
+
+[package.metadata.docs.rs]
+default-target = "x86_64-apple-darwin"
+features = ["all"]

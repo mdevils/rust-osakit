@@ -61,7 +61,7 @@ checksum = "2ff06a6505cde0766484f38d8479ac8e6d31c66fbc2d5492f65ca8c091456379"
 
 [[package]]
 name = "osakit"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "icrate",
  "serde",
