@@ -1,6 +1,6 @@
 [package]
 name = "osakit"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 authors = ["Marat Dulin <mdevils@gmail.com>"]
 description = "OSAKit macOS Framework adapted for Rust"
