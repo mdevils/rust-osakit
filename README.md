@@ -62,9 +62,9 @@ struct User {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let script = MyJsScript::new().unwrap();
+    let script = MyJsScript::new()?;
     assert_eq!(
-        script.multiply(3, 2).unwrap(),
+        script.multiply(3, 2)?,
         6
     );
     assert_eq!(
