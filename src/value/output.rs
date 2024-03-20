@@ -22,6 +22,8 @@ pub enum ScriptOutputConversionError {
     DescriptorNotFoundAtIndex(isize),
     #[error("infinite float cannot be converted: `{0}`")]
     InfiniteFloat(String),
+    #[error("url expected, but none found")]
+    UrlExpectedButNoneFound,
 }
 
 type FourCharCode = u32;
@@ -80,6 +82,7 @@ four_char_codes! {
     DESC_TYPE_NULL: "null",
     DESC_TYPE_ENUM: "enum",
     DESC_TYPE_LDATE: "ldt ",
+    DESC_TYPE_URL: "url ",
     OSTYPE_MISSING: "msng",
     OSTYPE_NULL: "null",
     OSTYPE_YES: "yes ",
@@ -140,6 +143,10 @@ pub(crate) fn get_value_from_ns_apple_event_descriptor(
                     four_char_code_to_string(type_code_value),
                 ))
             }
+        },
+        DESC_TYPE_URL => match unsafe { descriptor.stringValue() } {
+            Some(url) => Value::String(url.to_string()),
+            None => return Err(ScriptOutputConversionError::UrlExpectedButNoneFound),
         },
         DESC_TYPE_NULL => Value::Null,
         DESC_TYPE_RECORD => {
@@ -408,6 +415,14 @@ mod test {
         }
 
         #[test]
+        fn it_returns_positive_longlong_as_float() {
+            assert_eq!(
+                value_from_apple_script("9000000000"),
+                Value::Number(Number::from_f64(9000000000.0).unwrap())
+            );
+        }
+
+        #[test]
         fn it_returns_negative_long() {
             assert_eq!(
                 value_from_apple_script("-2000000"),
@@ -443,6 +458,14 @@ mod test {
             assert_eq!(
                 value_from_apple_script("-1234.5678"),
                 Value::Number(Number::from_f64(-1234.5678).unwrap())
+            );
+        }
+
+        #[test]
+        fn it_returns_url_as_string() {
+            assert_eq!(
+                value_from_apple_script("\"http://example.com\" as URL"),
+                Value::String("http://example.com".into())
             );
         }
 

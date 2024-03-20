@@ -11,6 +11,8 @@ Input and output data are represented using `Value` from
 
 Comes with `declare_script!` macro (unstable) to simplify working with `OSAKit Framework`.
 
+[Source code on GitHub](https://github.com/mdevils/rust-osakit)
+
 ## Installation
 
 Add `osakit` to the dependencies. Specify `"full"` feature if you want to use `declare_script`
@@ -26,7 +28,8 @@ osakit = { version = "0.1.0", features = ["full"] }
 ```rust
 use serde::{Deserialize, Serialize};
 use osakit::declare_script;
-                                                                                                       
+use std::error::Error;
+
 declare_script! {
     #[language(JavaScript)]
     #[source("
@@ -57,25 +60,25 @@ struct User {
     id: u16,
     name: String,
 }
-                                                                                                       
-#[test]
-fn it_runs_my_js_script() {
+
+fn main() -> Result<(), Box<dyn Error>> {
     let script = MyJsScript::new().unwrap();
     assert_eq!(
         script.multiply(3, 2).unwrap(),
         6
     );
     assert_eq!(
-        script.concat("Hello, ", "World").unwrap(),
+        script.concat("Hello, ", "World")?,
         "Hello, World"
     );
     assert_eq!(
-        script.current_user().unwrap(),
+        script.current_user()?,
         User {
             id: 21,
             name: "root".into()
         }
     );
+    Ok(())
 }
 ```
 
@@ -83,49 +86,50 @@ fn it_runs_my_js_script() {
 
 ```rust
 use osakit::{Language, Map, Script, Value, Number};
-                                                                                                       
-#[test]
-fn it_constructs_and_executes_scripts() {
-    let mut script = Script::new_from_source(
-        Language::AppleScript, "
-        on launch_terminal()
-            tell application \"Terminal\" to launch
-        end launch_terminal
-                                                                                                       
+use std::error::Error;
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let mut script = Script::new_from_source(Language::AppleScript, "
+        on is_app_running()
+            tell application \"Hopefully Non-Existing Application\" to running
+        end is_app_running
         on concat(x, y)
             return x & y
         end concat
-                                                                                                       
         return {id: 21, name: \"root\"}
     ");
-                                                                                                       
-    script.compile().unwrap();
-                                                                                                       
+    script.compile()?;
     assert_eq!(
-        script.execute().unwrap(),
+        script.execute()?,
         Value::Object(Map::from_iter(vec![
             ("id".into(), Value::Number(Number::from(21))),
             ("name".into(), Value::String("root".into()))
         ]))
     );
-                                                                                                       
     assert_eq!(
-        script.execute_function("concat", &vec![
+        script.execute_function("concat", vec![
             Value::String("Hello, ".into()),
             Value::String("World!".into())
-        ]).unwrap(),
+        ])?,
         Value::String("Hello, World!".into())
     );
-                                                                                                       
-    assert!(
-        script.execute_function("launch_terminal", &vec![]).is_ok()
+    assert_eq!(
+        script.execute_function("is_app_running", vec![])?,
+        Value::Bool(false)
     );
+
+    Ok(())
 }
 ```
 
 ## Usage
 
 See [Full Documentation](https://docs.rs/osakit/).
+
+## Limitations
+
+Due to limitations on `OSAKit Framework`-side integer values returned from `JavaScript` code
+are limited to `i32` type.
 
 ## Supported platforms
 
@@ -136,9 +140,9 @@ Due to the fact that OSAKit is Mac-specific, only `macOS` is supported.
 Licensed under either of
 
 * Apache License, Version 2.0
-  ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+  ([LICENSE-APACHE](LICENSE-APACHE) or <http://www.apache.org/licenses/LICENSE-2.0>)
 * MIT license
-  ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+  ([LICENSE-MIT](LICENSE-MIT) or <http://opensource.org/licenses/MIT>)
 
 at your option.
 

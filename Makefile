@@ -40,6 +40,6 @@ lint-fix:
 	cargo fmt
 
 test-watch:
-	cargo bin cargo-watch -x "test --all-features --no-fail-fast $T"
+	cargo bin cargo-watch -x "bin cargo-nextest run --all-features --no-fail-fast $T"
 
 pre-commit: test lint
