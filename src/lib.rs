@@ -18,7 +18,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! osakit = { version = "0.1", features = ["full"] }
+//! osakit = { version = "0.1.2", features = ["full"] }
 //! ```
 //!
 //! ## Example using `declare_script`
