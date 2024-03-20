@@ -20,7 +20,7 @@ macro or `"stable"` feature to only include stable API.
 
 ```toml
 [dependencies]
-osakit = { version = "0.1.0", features = ["full"] }
+osakit = { version = "0.2", features = ["full"] }
 ```
 
 ## Example using `declare_script`
