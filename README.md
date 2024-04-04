@@ -48,10 +48,10 @@ declare_script! {
             };
         }
     ")]
-    MyJsScript {
-        fn concat(x: &str, y: &str) -> String;
-        fn multiply(a: i32, b: i32) -> i32;
-        fn current_user() -> User;
+    pub MyJsScript {
+        pub fn concat(x: &str, y: &str) -> String;
+        pub fn multiply(a: i32, b: i32) -> i32;
+        pub fn current_user() -> User;
     }
 }
                                                                                                        

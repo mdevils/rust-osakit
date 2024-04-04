@@ -71,10 +71,10 @@ pub fn __exec_and_deserialize<T: DeserializeOwned, I: IntoIterator<Item = Value>
 ///             };
 ///         }
 ///     ")]
-///     MyJsScript {
-///         fn concat(x: &str, y: &str) -> String;
-///         fn multiply(a: i32, b: i32) -> i32;
-///         fn current_user() -> User;
+///     pub MyJsScript {
+///         pub fn concat(x: &str, y: &str) -> String;
+///         pub fn multiply(a: i32, b: i32) -> i32;
+///         pub fn current_user() -> User;
 ///     }
 /// }
 ///
@@ -129,7 +129,7 @@ macro_rules! declare_script {
         }
 
         impl $struct_name {
-            pub fn new() -> ::core::result::Result<$struct_name, $crate::ScriptCompilationError> {
+            $vis fn new() -> ::core::result::Result<$struct_name, $crate::ScriptCompilationError> {
                 let mut script = $crate::Script::new_from_source(
                     $crate::Language::$language,
                     $source
@@ -220,10 +220,10 @@ mod test {
                 throw new Error(message);
             }
         ")]
-        MacroTestScript {
-            fn concat(x: &str, y: &str) -> String;
-            fn no_args_no_result();
-            fn throws_an_error(message: &str);
+        pub(crate) MacroTestScript {
+            pub(crate) fn concat(x: &str, y: &str) -> String;
+            pub(crate) fn no_args_no_result();
+            pub(crate) fn throws_an_error(message: &str);
         }
     }
 
