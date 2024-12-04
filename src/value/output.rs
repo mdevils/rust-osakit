@@ -2,7 +2,7 @@ use crate::value::Map;
 use crate::Value;
 use icrate::objc2::rc::Id;
 use icrate::objc2::{msg_send, msg_send_id};
-use icrate::Foundation::{NSAppleEventDescriptor, NSInteger};
+use objc2_foundation::{NSAppleEventDescriptor, NSInteger};
 use serde_json::Number;
 use thiserror::Error;
 
@@ -208,7 +208,7 @@ mod test {
     use crate::script::{Language, Script};
     use crate::value::output::ScriptOutputConversionError;
     use icrate::objc2::ClassType;
-    use icrate::Foundation::NSAppleEventDescriptor;
+    use objc2_foundation::NSAppleEventDescriptor;
 
     #[test]
     fn it_returns_null_for_empty_descriptor() {

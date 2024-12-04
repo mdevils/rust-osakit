@@ -4,10 +4,10 @@ use crate::value::Value;
 use icrate::objc2::rc::Id;
 use icrate::objc2::runtime::AnyObject;
 use icrate::objc2::ClassType;
-use icrate::Foundation::{NSAppleEventDescriptor, NSDictionary, NSString, NSValue};
-use icrate::OSAKit::{
-    OSALanguage, OSALanguageInstance, OSANull, OSAScript, OSAScriptErrorMessageKey,
-    OSAScriptErrorRangeKey,
+use objc2_foundation::{NSAppleEventDescriptor, NSDictionary, NSString, NSValue};
+use objc2_osa_kit::{
+    OSALanguage, OSALanguageInstance, OSAScript, OSAScriptErrorMessageKey, OSAScriptErrorRangeKey,
+    OSAStorageOptions,
 };
 use std::fmt::{Debug, Formatter};
 use std::ops::Deref;
@@ -169,7 +169,7 @@ impl Script {
                 &script_ns_string,
                 None,
                 Some(ns_language_instance.deref()),
-                OSANull,
+                OSAStorageOptions::OSANull,
             )
         };
         Self {

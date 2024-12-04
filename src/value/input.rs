@@ -1,7 +1,7 @@
 use crate::Value;
 use icrate::objc2::rc::Id;
 use icrate::objc2::ClassType;
-use icrate::Foundation::{NSArray, NSDictionary, NSNull, NSNumber, NSObject, NSString};
+use objc2_foundation::{NSArray, NSDictionary, NSNull, NSNumber, NSObject, NSString};
 use std::ops::Deref;
 use thiserror::Error;
 
