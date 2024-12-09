@@ -128,10 +128,10 @@ See [Full Documentation](https://docs.rs/osakit/).
 
 ## Limitations
 
-Due to limitations on `OSAKit Framework`-side integer values returned from `JavaScript` code
-are limited to `i32` type.
-`OSAKit` calls must be made from the main thread, so, for example, the default `cargo test`s can fail,
-after stalling for 2 min, use a custom test harness like [libtest-mimic](https://github.com/LukasKalbertodt/libtest-mimic) with `--test-threads=1`.
+* Due to limitations on `OSAKit Framework`-side integer values returned from `JavaScript` code
+  are limited to `i32` type.
+* `OSAKit` calls must be made from the main thread, so, for example, the default `cargo test`s can fail,
+  after stalling for 2 min, use a custom test harness like [libtest-mimic](https://github.com/LukasKalbertodt/libtest-mimic) with `--test-threads=1`.
 
 ## Supported platforms
 
