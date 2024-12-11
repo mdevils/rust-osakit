@@ -39,7 +39,7 @@ declare-script = []
 
 # binaries for cargo-run-bin
 [package.metadata.bin]
-cargo-nextest = { version = "0.9.68", locked = true }
+cargo-nextest = { version = "0.9.86-b.3", locked = true }
 cargo-watch = { version = "8.5.2" }
 
 [package.metadata.docs.rs]
