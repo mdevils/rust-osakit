@@ -1,5 +1,4 @@
-use crate::value::Map;
-use crate::Value;
+use super::{Map, Value};
 use icrate::objc2::rc::Id;
 use icrate::objc2::{msg_send, msg_send_id};
 use objc2_foundation::{NSAppleEventDescriptor, NSInteger};
@@ -204,9 +203,9 @@ fn get_nested_ns_apple_event_descriptor_value(
 
 #[cfg(test)]
 mod test {
+    use super::super::super::script::{Language, Script};
+    use super::super::super::value::output::ScriptOutputConversionError;
     use super::*;
-    use crate::script::{Language, Script};
-    use crate::value::output::ScriptOutputConversionError;
     use icrate::objc2::ClassType;
     use objc2_foundation::NSAppleEventDescriptor;
 
@@ -360,8 +359,8 @@ mod test {
     }
 
     mod apple_script {
+        use super::super::super::super::script::ScriptExecutionError;
         use super::*;
-        use crate::ScriptExecutionError;
         use std::time::{SystemTime, UNIX_EPOCH};
 
         fn value_from_apple_script(value: &str) -> Value {

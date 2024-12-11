@@ -1,4 +1,5 @@
-use crate::{Script, ScriptExecutionError, Value};
+use super::script::{Script, ScriptExecutionError};
+use super::value::Value;
 use serde::de::DeserializeOwned;
 use serde_json::from_value;
 use thiserror::Error;
@@ -205,7 +206,8 @@ macro_rules! __script_fn_impl {
 
 #[cfg(test)]
 mod test {
-    use crate::{ScriptExecutionError, ScriptFunctionRunError};
+    use super::super::script::ScriptExecutionError;
+    use super::ScriptFunctionRunError;
 
     declare_script! {
         #[language(JavaScript)]
