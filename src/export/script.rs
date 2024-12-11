@@ -19,6 +19,13 @@ pub enum Language {
     JavaScript,
 }
 
+fn check_main_thread() -> Result<(), ScriptExecutionError> {
+    if std::thread::current().name() != Some("main") {
+        return Err(ScriptExecutionError::MainThread);
+    }
+    Ok(())
+}
+
 /// Script instance, allowing to compile and execute `AppleScript`/`JavaScript` using `OSAKit`.
 /// Uses `OSAScript` class from `OSAKit Framework` directly.
 ///
@@ -120,6 +127,8 @@ pub enum ScriptExecutionError {
     /// Happens when trying to convert arguments to the format compatible with `OSAScript`.
     #[error("input value conversion error")]
     InputConversion(#[from] ScriptInputConversionError),
+    #[error("osakit can only be used from the main thread")]
+    MainThread,
 }
 
 fn extract_error_data(
@@ -204,6 +213,7 @@ impl Script {
     /// In case of `AppleScript` output can be returned using `return` keyword. I.e. `return "test"`.
     /// In case of `JavaScript` output can be returned using `output` variable. I.e. `output = "test";`.
     pub fn execute(&self) -> Result<Value, ScriptExecutionError> {
+        check_main_thread()?;
         let mut error_opt: Option<Id<NSDictionary<NSString, AnyObject>>> = None;
         let result = unsafe { self.script.executeAndReturnError(Some(&mut error_opt)) };
         Self::process_execution_result(result, error_opt)
@@ -238,6 +248,7 @@ impl Script {
         function_name: &str,
         arguments: I,
     ) -> Result<Value, ScriptExecutionError> {
+        check_main_thread()?;
         let mut error_opt: Option<Id<NSDictionary<NSString, AnyObject>>> = None;
         let ns_handler_name = NSString::from_str(function_name);
         let ns_arguments = values_vec_to_ns_array(arguments)?;
