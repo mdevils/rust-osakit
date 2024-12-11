@@ -1,6 +1,6 @@
 [package]
 name = "osakit"
-version = "0.2.4"
+version = "0.3.0"
 edition = "2021"
 authors = ["Marat Dulin <mdevils@gmail.com>"]
 description = "OSAKit macOS Framework adapted for Rust"
@@ -24,6 +24,12 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "1"
 
+[dev-dependencies]
+libtest-mimic-collect = "0.3.1"
+
+[lib]
+test = false
+
 [features]
 stable = []
 unstable = ["declare-script"]
@@ -39,3 +45,8 @@ cargo-watch = { version = "8.5.2" }
 [package.metadata.docs.rs]
 default-target = "x86_64-apple-darwin"
 features = ["full"]
+
+[[test]]
+name = "test"
+harness = false
+path = "src/test.rs"

@@ -132,6 +132,8 @@ See [Full Documentation](https://docs.rs/osakit/).
   are limited to `i32` type.
 * `OSAKit` calls must be made from the main thread, so, for example, the default `cargo test`s can fail,
   after stalling for 2 min, use a custom test harness like [libtest-mimic](https://github.com/LukasKalbertodt/libtest-mimic) with `--test-threads=1`.
+  For convenience, there is a [libtest-mimic-collect](https://crates.io/crates/libtest-mimic-collect)
+  crate that provides a procedural macro for collecting tests for `libtest-mimic` crate.
 
 ## Supported platforms
 

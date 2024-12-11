@@ -30,7 +30,7 @@ cargo-run-bin:
 	fi
 
 test:
-	cargo test --all-features
+	cargo test --all-features -- --test-threads=1
 
 lint:
 	cargo fmt --check
