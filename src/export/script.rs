@@ -1,9 +1,7 @@
 use crate::value::input::{values_vec_to_ns_array, ScriptInputConversionError};
 use crate::value::output::{get_value_from_ns_apple_event_descriptor, ScriptOutputConversionError};
 use crate::value::Value;
-use icrate::objc2::rc::Id;
-use icrate::objc2::runtime::AnyObject;
-use icrate::objc2::ClassType;
+use objc2::{rc::Retained, runtime::AnyObject, AllocAnyThread};
 use objc2_foundation::{NSAppleEventDescriptor, NSDictionary, NSString, NSValue};
 use objc2_osa_kit::{
     OSALanguage, OSALanguageInstance, OSAScript, OSAScriptErrorMessageKey, OSAScriptErrorRangeKey,
@@ -78,7 +76,7 @@ fn check_main_thread() -> Result<(), ScriptExecutionError> {
 /// # }
 /// ```
 pub struct Script {
-    script: Id<OSAScript>,
+    script: Retained<OSAScript>,
     compiled: bool,
 }
 
@@ -132,18 +130,21 @@ pub enum ScriptExecutionError {
 }
 
 fn extract_error_data(
-    error_dict_opt: Option<Id<NSDictionary<NSString, AnyObject>>>,
+    error_dict_opt: Option<Retained<NSDictionary<NSString, AnyObject>>>,
 ) -> Option<(String, (usize, usize))> {
     match error_dict_opt {
         None => None,
         Some(error_dict) => match unsafe { error_dict.valueForKey(OSAScriptErrorMessageKey) } {
             None => None,
             Some(message_obj) => {
-                let error_message_ns_str: Id<NSString> = unsafe { Id::cast(message_obj) };
+                let error_message_ns_str: Retained<NSString> =
+                    unsafe { Retained::cast_unchecked(message_obj) };
                 Some((
                     error_message_ns_str.to_string(),
                     match unsafe { error_dict.valueForKey(OSAScriptErrorRangeKey) }
-                        .map(|range| -> Id<NSValue> { unsafe { Id::cast(range) } })
+                        .map(|range| -> Retained<NSValue> {
+                            unsafe { Retained::cast_unchecked(range) }
+                        })
                         .map(|range| range.get_range())
                     {
                         Some(Some(range)) => (range.location, range.length),
@@ -156,7 +157,7 @@ fn extract_error_data(
 }
 
 #[inline]
-fn get_osa_language_instance(language: Language) -> Id<OSALanguageInstance> {
+fn get_osa_language_instance(language: Language) -> Retained<OSALanguageInstance> {
     let language_name = match language {
         Language::AppleScript => "AppleScript",
         Language::JavaScript => "JavaScript",
@@ -178,7 +179,7 @@ impl Script {
                 &script_ns_string,
                 None,
                 Some(ns_language_instance.deref()),
-                OSAStorageOptions::OSANull,
+                OSAStorageOptions::Null,
             )
         };
         Self {
@@ -193,7 +194,7 @@ impl Script {
             return Ok(());
         }
 
-        let mut error_opt: Option<Id<NSDictionary<NSString, AnyObject>>> = None;
+        let mut error_opt: Option<Retained<NSDictionary<NSString, AnyObject>>> = None;
         if unsafe { self.script.compileAndReturnError(Some(&mut error_opt)) } {
             self.compiled = true;
             return Ok(());
@@ -214,14 +215,14 @@ impl Script {
     /// In case of `JavaScript` output can be returned using `output` variable. I.e. `output = "test";`.
     pub fn execute(&self) -> Result<Value, ScriptExecutionError> {
         check_main_thread()?;
-        let mut error_opt: Option<Id<NSDictionary<NSString, AnyObject>>> = None;
+        let mut error_opt: Option<Retained<NSDictionary<NSString, AnyObject>>> = None;
         let result = unsafe { self.script.executeAndReturnError(Some(&mut error_opt)) };
         Self::process_execution_result(result, error_opt)
     }
 
     fn process_execution_result(
-        result: Option<Id<NSAppleEventDescriptor>>,
-        error_opt: Option<Id<NSDictionary<NSString, AnyObject>>>,
+        result: Option<Retained<NSAppleEventDescriptor>>,
+        error_opt: Option<Retained<NSDictionary<NSString, AnyObject>>>,
     ) -> Result<Value, ScriptExecutionError> {
         match error_opt {
             None => match result {
@@ -249,7 +250,7 @@ impl Script {
         arguments: I,
     ) -> Result<Value, ScriptExecutionError> {
         check_main_thread()?;
-        let mut error_opt: Option<Id<NSDictionary<NSString, AnyObject>>> = None;
+        let mut error_opt: Option<Retained<NSDictionary<NSString, AnyObject>>> = None;
         let ns_handler_name = NSString::from_str(function_name);
         let ns_arguments = values_vec_to_ns_array(arguments)?;
         let result = unsafe {
