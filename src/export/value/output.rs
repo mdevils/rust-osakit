@@ -1,6 +1,5 @@
 use super::{Map, Value};
-use icrate::objc2::rc::Id;
-use icrate::objc2::{msg_send, msg_send_id};
+use objc2::{msg_send, rc::Retained};
 use objc2_foundation::{NSAppleEventDescriptor, NSInteger};
 use serde_json::Number;
 use thiserror::Error;
@@ -28,22 +27,22 @@ pub enum ScriptOutputConversionError {
 type FourCharCode = u32;
 
 #[inline]
-fn get_descriptor_type(descriptor: &Id<NSAppleEventDescriptor>) -> FourCharCode {
+fn get_descriptor_type(descriptor: &Retained<NSAppleEventDescriptor>) -> FourCharCode {
     unsafe { msg_send![descriptor, descriptorType] }
 }
 
 #[inline]
 fn get_descriptor_for_keyword(
-    descriptor: &Id<NSAppleEventDescriptor>,
+    descriptor: &Retained<NSAppleEventDescriptor>,
     keyword: FourCharCode,
-) -> Option<Id<NSAppleEventDescriptor>> {
-    unsafe { msg_send_id![descriptor, descriptorForKeyword: keyword] }
+) -> Option<Retained<NSAppleEventDescriptor>> {
+    unsafe { msg_send![descriptor, descriptorForKeyword: keyword] }
 }
 
 #[inline]
 fn add_special_key_to_map_if_defined(
     map: &mut Map<String, Value>,
-    descriptor: &Id<NSAppleEventDescriptor>,
+    descriptor: &Retained<NSAppleEventDescriptor>,
     keyword: FourCharCode,
     key: &str,
 ) -> Result<(), ScriptOutputConversionError> {
@@ -100,7 +99,7 @@ fn four_char_code_to_string(t: FourCharCode) -> String {
 }
 
 pub(crate) fn get_value_from_ns_apple_event_descriptor(
-    descriptor: Id<NSAppleEventDescriptor>,
+    descriptor: Retained<NSAppleEventDescriptor>,
 ) -> Result<Value, ScriptOutputConversionError> {
     Ok(match get_descriptor_type(&descriptor) {
         DESC_TYPE_STRING => Value::String(
@@ -193,7 +192,7 @@ pub(crate) fn get_value_from_ns_apple_event_descriptor(
 
 #[inline]
 fn get_nested_ns_apple_event_descriptor_value(
-    descriptor: &Id<NSAppleEventDescriptor>,
+    descriptor: &Retained<NSAppleEventDescriptor>,
     index: NSInteger,
 ) -> Result<Value, ScriptOutputConversionError> {
     get_value_from_ns_apple_event_descriptor(unsafe { descriptor.descriptorAtIndex(index) }.ok_or(
@@ -206,7 +205,7 @@ mod test {
     use super::super::super::script::{Language, Script};
     use super::super::super::value::output::ScriptOutputConversionError;
     use super::*;
-    use icrate::objc2::ClassType;
+    use objc2::AllocAnyThread;
     use objc2_foundation::NSAppleEventDescriptor;
 
     #[test]
